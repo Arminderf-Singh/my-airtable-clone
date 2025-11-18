@@ -1,0 +1,317 @@
+.landing-page {
+  min-height: 100vh;
+  background-color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.landing-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: white;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.logo-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #1a1a1a;
+}
+
+.text-logo {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #FFBF00, #FF6B00);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-left: 40px;
+}
+
+.button {
+  padding: 8px 12px;
+  color: #4b5563;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.button:hover {
+  color: #1f2937;
+  background-color: #f3f4f6;
+}
+
+.lefthandside-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bookademo-button {
+  padding: 8px 16px;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.bookademo-button:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.signup-button {
+  padding: 8px 16px;
+  color: white;
+  background: linear-gradient(135deg, #FFBF00, #FF6B00);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.signup-button:hover {
+  background: linear-gradient(135deg, #e6ac00, #e55f00);
+  transform: translateY(-1px);
+}
+
+.login-button {
+  padding: 8px 16px;
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.login-button:hover {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.body-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 16px;
+  text-align: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  min-height: calc(100vh - 73px);
+}
+
+.body-title {
+  max-width: 64rem;
+  margin-bottom: 48px;
+}
+
+.body-title div:first-child {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+
+.body-title div:last-child {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.chatbox {
+  display: flex;
+  gap: 12px;
+  max-width: 32rem;
+  width: 100%;
+  background: white;
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.chatbox input {
+  flex: 1;
+  padding: 16px 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.chatbox input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.builditnow-button {
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #FFBF00, #FF6B00);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.builditnow-button:hover {
+  background: linear-gradient(135deg, #e6ac00, #e55f00);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(255, 107, 0, 0.4);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .landing-page-header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 12px 16px;
+  }
+  
+  .header-buttons {
+    margin-left: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+  
+  .lefthandside-buttons {
+    gap: 8px;
+  }
+  
+  .body-title div:first-child,
+  .body-title div:last-child {
+    font-size: 2.5rem;
+  }
+  
+  .chatbox {
+    flex-direction: column;
+  }
+  
+  .body-content {
+    padding: 40px 16px;
+  }
+}
+
+/* Add these to your existing CSS */
+
+.signin-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 40px 20px;
+}
+
+.signin-card {
+  background: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid #f1f5f9;
+}
+
+.signin-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.signin-subtitle {
+  color: #6b7280;
+  margin-bottom: 32px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.google-signin-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 24px;
+}
+
+.google-signin-button:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.google-signin-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.google-icon {
+  flex-shrink: 0;
+}
+
+.signin-footer {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.signup-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}

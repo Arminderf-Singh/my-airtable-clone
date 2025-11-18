@@ -1,70 +1,62 @@
 import Link from "next/link";
-
-import { LatestPost } from "~/app/_components/post";
-import { auth } from "~/server/auth";
-import { api, HydrateClient } from "~/trpc/server";
-import styles from "./index.module.css";
+import { getSession } from "~/lib/auth";
+import '../styles/landingpage.css';
 
 export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
-  const session = await auth();
-
-  if (session?.user) {
-    void api.post.getLatest.prefetch();
-  }
+  const session = await getSession();
 
   return (
-    <HydrateClient>
-      <main className={styles.main}>
-        <div className={styles.container}>
-          <h1 className={styles.title}>
-            Create <span className={styles.pinkSpan}>T3</span> App
-          </h1>
-          <div className={styles.cardRow}>
-            <Link
-              className={styles.card}
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className={styles.cardTitle}>First Steps →</h3>
-              <div className={styles.cardText}>
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className={styles.card}
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className={styles.cardTitle}>Documentation →</h3>
-              <div className={styles.cardText}>
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
+    <div className="landing-page">
+      <div className="landing-page-header">
+          <div className="logo-name">
+            <div className="text-logo">A</div>
+            Airtable Clone
           </div>
-          <div className={styles.showcaseContainer}>
-            <p className={styles.showcaseText}>
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-
-            <div className={styles.authContainer}>
-              <p className={styles.showcaseText}>
-                {session && <span>Logged in as {session.user?.name}</span>}
-              </p>
-              <Link
-                href={session ? "/api/auth/signout" : "/api/auth/signin"}
-                className={styles.loginButton}
-              >
-                {session ? "Sign out" : "Sign in"}
-              </Link>
-            </div>
+          <div className="header-buttons">
+            <button className="button">Platform</button>
+            <button className="button">Solutions</button>
+            <button className="button">Resources</button>
+            <button className="button">Enterprise</button>
+            <button className="button">Pricing</button>
           </div>
-
-          {session?.user && <LatestPost />}
+          <div className="lefthandside-buttons">
+            <button className="bookademo-button">Book a Demo</button>
+            {session ? (
+              // Show when user is logged in
+              <>
+                <Link className="signup-button" href="/bases">
+                  Go to App
+                </Link>
+                <Link className="login-button" href="/api/auth/signout">
+                  Log out
+                </Link>
+              </>
+            ) : (
+              // Show when user is not logged in
+              <>
+                <button className="signup-button">Sign Up For Free</button>
+                <Link className="login-button" href="/auth/signin">
+                  Log in
+                </Link>
+              </>
+            )}
+          </div>
+      </div>
+      <div className="body-content">
+        <div className="body-title">
+          <div>From idea to app in an instant</div>
+          <div>Build with AI that means business</div>
         </div>
-      </main>
-    </HydrateClient>
+        <div className="chatbox">
+          <input 
+            type="text"
+            placeholder="Type something here."
+          />
+          <button className="builditnow-button">
+            Build it Now
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
