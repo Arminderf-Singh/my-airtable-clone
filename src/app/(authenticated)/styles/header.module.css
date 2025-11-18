@@ -1,0 +1,179 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e1e5e9;
+  height: 64px;
+  box-sizing: border-box;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.hamburgerButton {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: #42526e;
+}
+
+.hamburgerButton:hover {
+  background-color: #f8f9fa;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logoText {
+  font-size: 20px;
+  font-weight: 700;
+  color: #172b4d;
+  margin-right: 16px;
+}
+
+.pageTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #42526e;
+  margin: 0;
+}
+
+.searchSection {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 24px;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  background-color: #f8f9fa;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 8px 12px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.searchBar:focus-within {
+  background-color: white;
+  border-color: #2d9cdb;
+  box-shadow: 0 0 0 2px rgba(45, 156, 219, 0.1);
+}
+
+.searchIcon {
+  margin-right: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.searchInput {
+  border: none;
+  background: none;
+  outline: none;
+  flex: 1;
+  font-size: 14px;
+  color: #172b4d;
+}
+
+.searchInput::placeholder {
+  color: #6b778c;
+}
+
+.searchShortcut {
+  font-size: 12px;
+  color: #6b778c;
+  background-color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #e1e5e9;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.tryDemoButton {
+  background: linear-gradient(135deg, #0052cc, #0066ff);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+
+.tryDemoButton:hover {
+  background: linear-gradient(135deg, #0041a8, #0052cc);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 82, 204, 0.3);
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.iconButton:hover {
+  background-color: #f8f9fa;
+}
+
+.helpIcon {
+  font-weight: 600;
+  color: #42526e;
+  font-size: 16px;
+}
+
+.notificationIcon {
+  font-size: 16px;
+  color: #42526e;
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #0052cc, #0066ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.userAvatar:hover {
+  transform: scale(1.05);
+}
