@@ -12,7 +12,7 @@ export default function SignIn() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is already logged in
+    
     getSession().then((session) => {
       if (session) {
         router.push("/bases");
@@ -27,14 +27,14 @@ export default function SignIn() {
       
       const result = await signIn("google", {
         callbackUrl: `${window.location.origin}/bases`,
-        redirect: false, // We'll handle redirect manually
+        redirect: false, 
       });
 
       if (result?.error) {
         setError("Failed to sign in with Google. Please try again.");
         console.error("Sign in error:", result.error);
       } else if (result?.url) {
-        // Successful sign in, redirect to the callback URL
+        
         window.location.href = result.url;
       }
     } catch (error) {

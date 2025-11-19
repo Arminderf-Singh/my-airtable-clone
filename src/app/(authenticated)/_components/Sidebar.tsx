@@ -6,24 +6,24 @@ export default function Sidebar() {
       <div className={styles.sidebarContent}>
         {/* Logo Section */}
         <div className={styles.logoSection}>
-          <div className={styles.logo}>📊</div>
+          <div className={styles.logo}></div>
           <span className={styles.logoText}>MY-AIRTABLE-CLONE</span>
         </div>
 
         {/* Navigation */}
         <nav className={styles.navigation}>
           <div className={`${styles.navItem} ${styles.active}`}>
-            <span className={styles.navIcon}>🏠</span>
+            <span className={styles.navIcon}></span>
             <span>Home</span>
           </div>
           
           <div className={styles.navItem}>
-            <span className={styles.navIcon}>⭐</span>
+            <span className={styles.navIcon}></span>
             <span>Starred</span>
           </div>
           
           <div className={styles.navItem}>
-            <span className={styles.navIcon}>👥</span>
+            <span className={styles.navIcon}></span>
             <span>Shared</span>
           </div>
 

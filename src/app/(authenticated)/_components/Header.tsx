@@ -17,7 +17,7 @@ export default function Header() {
       {/* Search Section */}
       <div className={styles.searchSection}>
         <div className={styles.searchBar}>
-          <span className={styles.searchIcon}>🔍</span>
+          <span className={styles.searchIcon}></span>
           <input 
             type="text" 
             placeholder="Search..." 
@@ -36,7 +36,7 @@ export default function Header() {
           <span className={styles.helpIcon}>?</span>
         </button>
         <button className={styles.iconButton}>
-          <span className={styles.notificationIcon}>🔔</span>
+          <span className={styles.notificationIcon}></span>
         </button>
         <div className={styles.userAvatar}>
           <span>A</span>

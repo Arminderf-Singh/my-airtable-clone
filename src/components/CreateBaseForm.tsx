@@ -10,8 +10,8 @@ export function CreateBaseForm() {
   
   const createBase = api.base.create.useMutation({
     onSuccess: () => {
-      router.refresh(); // Refresh the page to show the new base
-      setName(""); // Clear the input
+      router.refresh();
+      setName(""); 
     },
   });
 
