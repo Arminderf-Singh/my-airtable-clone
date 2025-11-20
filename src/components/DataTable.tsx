@@ -59,6 +59,413 @@ interface NumberFilter extends BaseFilter {
 
 type Filter = TextFilter | NumberFilter;
 
+// Field Dropdown Menu Component
+function FieldDropdownMenu({
+  columnId,
+  columnName,
+  columnType,
+  isOpen,
+  onClose,
+  position,
+  onAddFilter,
+  onEditField,
+  onDuplicateField,
+  onInsertLeft,
+  onInsertRight,
+  onDeleteField,
+  onHideField,
+  onSort,
+  onGroupBy
+}: {
+  columnId: string;
+  columnName: string;
+  columnType: "text" | "number";
+  isOpen: boolean;
+  onClose: () => void;
+  position: { top: number; left: number };
+  onAddFilter: (columnId: string, columnType: "text" | "number", operator: string, value: string) => void;
+  onEditField: (columnId: string, newName: string) => void;
+  onDuplicateField: (columnId: string) => void;
+  onInsertLeft: (columnId: string) => void;
+  onInsertRight: (columnId: string) => void;
+  onDeleteField: (columnId: string) => void;
+  onHideField: (columnId: string) => void;
+  onSort: (columnId: string, direction: "asc" | "desc") => void;
+  onGroupBy: (columnId: string) => void;
+}) {
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [editName, setEditName] = useState(columnName);
+  const [filterOperator, setFilterOperator] = useState("contains");
+  const [filterValue, setFilterValue] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const handleFilterApply = () => {
+    if (filterValue.trim() || filterOperator === "isEmpty" || filterOperator === "isNotEmpty") {
+      onAddFilter(columnId, columnType, filterOperator, filterValue);
+      setActiveSection(null);
+    }
+  };
+
+  const handleEditField = () => {
+    if (editName.trim() && editName !== columnName) {
+      onEditField(columnId, editName);
+    }
+    setActiveSection(null);
+  };
+
+  const menuSections = [
+    {
+      title: "Sort",
+      items: [
+        {
+          label: "Sort A → Z",
+          icon: "↑",
+          action: () => onSort(columnId, "asc")
+        },
+        {
+          label: "Sort Z → A",
+          icon: "↓",
+          action: () => onSort(columnId, "desc")
+        }
+      ]
+    },
+    {
+      title: "Filter",
+      items: [
+        {
+          label: "Filter by this field",
+          icon: "",
+          action: () => setActiveSection("filter")
+        }
+      ]
+    },
+    {
+      title: "Group",
+      items: [
+        {
+          label: "Group by this field",
+          icon: "",
+          action: () => onGroupBy(columnId)
+        }
+      ]
+    },
+    {
+      title: "Field",
+      items: [
+        {
+          label: "Edit field",
+          icon: "",
+          action: () => setActiveSection("edit")
+        },
+        {
+          label: "Duplicate field",
+          icon: "",
+          action: () => onDuplicateField(columnId)
+        },
+        {
+          label: "Insert left",
+          icon: "",
+          action: () => onInsertLeft(columnId)
+        },
+        {
+          label: "Insert right",
+          icon: "",
+          action: () => onInsertRight(columnId)
+        },
+        {
+          label: "Hide field",
+          icon: "",
+          action: () => onHideField(columnId)
+        },
+        {
+          label: "Delete field",
+          icon: "",
+          action: () => onDeleteField(columnId)
+        }
+      ]
+    },
+    {
+      title: "Advanced",
+      items: [
+        {
+          label: "Run field agent",
+          icon: "",
+          action: () => console.log("Run field agent for", columnId)
+        },
+        {
+          label: "Summarize field",
+          icon: "",
+          action: () => console.log("Summarize field for", columnId)
+        },
+        {
+          label: "Write headline",
+          icon: "",
+          action: () => console.log("Write headline for", columnId)
+        },
+        {
+          label: "Copy field URL",
+          icon: "",
+          action: () => console.log("Copy URL for", columnId)
+        },
+        {
+          label: "Edit description",
+          icon: "",
+          action: () => console.log("Edit description for", columnId)
+        },
+        {
+          label: "Edit permissions",
+          icon: "",
+          action: () => console.log("Edit permissions for", columnId)
+        },
+        {
+          label: "Show dependencies",
+          icon: "",
+          action: () => console.log("Show dependencies for", columnId)
+        }
+      ]
+    }
+  ];
+
+  return (
+    <div
+      ref={dropdownRef}
+      className="field-dropdown-menu"
+      style={{
+        position: 'fixed',
+        top: position.top,
+        left: position.left,
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        borderRadius: '8px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+        zIndex: 1000,
+        minWidth: '280px',
+        maxWidth: '320px',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontSize: '14px',
+      }}
+    >
+      {/* Header */}
+      <div style={{
+        padding: '12px 16px',
+        borderBottom: '1px solid #f0f0f0',
+        fontWeight: '600',
+        color: '#2d2d2d',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <span>{columnName}</span>
+        <button
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '18px',
+            cursor: 'pointer',
+            color: '#666'
+          }}
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Active Section (Filter/Edit) */}
+      {activeSection === "filter" && (
+        <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
+          <div style={{ marginBottom: '12px', fontWeight: '500' }}>Filter by {columnName}</div>
+          <select
+            value={filterOperator}
+            onChange={(e) => setFilterOperator(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              marginBottom: '8px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              fontSize: '14px'
+            }}
+          >
+            <option value="contains">Contains</option>
+            <option value="notContains">Does not contain</option>
+            <option value="equals">Is exactly</option>
+            {columnType === "number" && (
+              <>
+                <option value="gt">Greater than</option>
+                <option value="lt">Less than</option>
+                <option value="gte">Greater than or equal to</option>
+                <option value="lte">Less than or equal to</option>
+              </>
+            )}
+            <option value="isEmpty">Is empty</option>
+            <option value="isNotEmpty">Is not empty</option>
+          </select>
+          {(filterOperator !== "isEmpty" && filterOperator !== "isNotEmpty") && (
+            <input
+              type={columnType === "number" ? "number" : "text"}
+              value={filterValue}
+              onChange={(e) => setFilterValue(e.target.value)}
+              placeholder="Enter value..."
+              style={{
+                width: '100%',
+                padding: '8px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                marginBottom: '12px'
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && handleFilterApply()}
+            />
+          )}
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            <button
+              onClick={() => setActiveSection(null)}
+              style={{
+                padding: '6px 12px',
+                border: '1px solid #ddd',
+                background: 'white',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleFilterApply}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                background: '#1a73e8',
+                color: 'white',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeSection === "edit" && (
+        <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
+          <div style={{ marginBottom: '12px', fontWeight: '500' }}>Edit Field Name</div>
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              fontSize: '14px',
+              marginBottom: '12px'
+            }}
+            onKeyDown={(e) => e.key === 'Enter' && handleEditField()}
+          />
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            <button
+              onClick={() => setActiveSection(null)}
+              style={{
+                padding: '6px 12px',
+                border: '1px solid #ddd',
+                background: 'white',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleEditField}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                background: '#1a73e8',
+                color: 'white',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Menu Sections */}
+      <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+        {menuSections.map((section, index) => (
+          <div key={section.title}>
+            <div style={{
+              padding: '8px 16px',
+              fontSize: '12px',
+              fontWeight: '600',
+              color: '#666',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              borderTop: index > 0 ? '1px solid #f0f0f0' : 'none'
+            }}>
+              {section.title}
+            </div>
+            {section.items.map((item) => (
+              <button
+                key={item.label}
+                onClick={item.action}
+                style={{
+                  width: '100%',
+                  padding: '8px 16px',
+                  border: 'none',
+                  background: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#2d2d2d'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f8f9fa';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'none';
+                }}
+              >
+                <span style={{ fontSize: '16px', width: '20px' }}>{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Create default table with sample data
 const createDefaultTable = (tableName: string = "New Table"): TableData => {
   const defaultColumns: Column[] = [
@@ -84,11 +491,10 @@ const createDefaultTable = (tableName: string = "New Table"): TableData => {
   };
 };
 
-// Create rows in chunks to avoid blocking
+// Create 100k rows for performance testing
 const createBulkRows = (columns: Column[], count: number = 100000): TableRow[] => {
-  const rows: TableRow[] = [];
-  for (let i = 0; i < count; i++) {
-    const row: TableRow = { id: `bulk-row-${i}` };
+  return Array.from({ length: count }, (_, index) => {
+    const row: TableRow = { id: `bulk-row-${index}` };
     
     columns.forEach(column => {
       switch (column.type) {
@@ -103,9 +509,8 @@ const createBulkRows = (columns: Column[], count: number = 100000): TableRow[] =
       }
     });
     
-    rows.push(row);
-  }
-  return rows;
+    return row;
+  });
 };
 
 export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
@@ -120,6 +525,8 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
   const [activeFilterColumn, setActiveFilterColumn] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [activeFieldDropdown, setActiveFieldDropdown] = useState<string | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const currentPageRef = useRef(0);
@@ -262,12 +669,12 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
     return result;
   }, [tableData, searchTerm, filters]);
 
-  // Fixed virtualizer with consistent row height
+  // Virtualizer for performance
   const rowVirtualizer = useVirtualizer({
     count: filteredData.length,
     getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 40, // Fixed row height
-    overscan: 5, // Reduced overscan
+    estimateSize: () => 40,
+    overscan: 5,
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
@@ -310,6 +717,169 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
   const getColumnFilters = useCallback((columnId: string) => {
     return filters.filter(filter => filter.columnId === columnId);
   }, [filters]);
+
+  // Field Dropdown Handlers
+  const handleFieldMenuOpen = (columnId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    const rect = event.currentTarget.getBoundingClientRect();
+    setDropdownPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX
+    });
+    setActiveFieldDropdown(columnId);
+    setActiveFilterColumn(null);
+  };
+
+  const handleFieldMenuClose = () => {
+    setActiveFieldDropdown(null);
+  };
+
+  const handleEditField = (columnId: string, newName: string) => {
+    setData(prev => ({
+      ...prev,
+      columns: prev.columns.map(col => 
+        col.id === columnId ? { ...col, name: newName } : col
+      )
+    }));
+  };
+
+  const handleDuplicateField = (columnId: string) => {
+    const columnToDuplicate = data.columns.find(col => col.id === columnId);
+    if (!columnToDuplicate) return;
+
+    const newColumn: Column = {
+      id: `col-${Date.now()}`,
+      name: `${columnToDuplicate.name} Copy`,
+      type: columnToDuplicate.type,
+    };
+
+    setData(prev => ({
+      ...prev,
+      columns: [...prev.columns, newColumn],
+      rows: prev.rows.map(row => ({
+        ...row,
+        [newColumn.id]: columnToDuplicate.type === "number" ? 0 : "",
+      })),
+    }));
+
+    loadedRowsRef.current = loadedRowsRef.current.map(row => ({
+      ...row,
+      [newColumn.id]: columnToDuplicate.type === "number" ? 0 : "",
+    }));
+  };
+
+  const handleInsertLeft = (columnId: string) => {
+    const columnIndex = data.columns.findIndex(col => col.id === columnId);
+    if (columnIndex === -1) return;
+
+    const newColumn: Column = {
+      id: `col-${Date.now()}`,
+      name: "New Column",
+      type: "text",
+    };
+
+    const newColumns = [...data.columns];
+    newColumns.splice(columnIndex, 0, newColumn);
+
+    setData(prev => ({
+      ...prev,
+      columns: newColumns,
+      rows: prev.rows.map(row => ({
+        ...row,
+        [newColumn.id]: "",
+      })),
+    }));
+
+    loadedRowsRef.current = loadedRowsRef.current.map(row => ({
+      ...row,
+      [newColumn.id]: "",
+    }));
+  };
+
+  const handleInsertRight = (columnId: string) => {
+    const columnIndex = data.columns.findIndex(col => col.id === columnId);
+    if (columnIndex === -1) return;
+
+    const newColumn: Column = {
+      id: `col-${Date.now()}`,
+      name: "New Column",
+      type: "text",
+    };
+
+    const newColumns = [...data.columns];
+    newColumns.splice(columnIndex + 1, 0, newColumn);
+
+    setData(prev => ({
+      ...prev,
+      columns: newColumns,
+      rows: prev.rows.map(row => ({
+        ...row,
+        [newColumn.id]: "",
+      })),
+    }));
+
+    loadedRowsRef.current = loadedRowsRef.current.map(row => ({
+      ...row,
+      [newColumn.id]: "",
+    }));
+  };
+
+  const handleDeleteField = (columnId: string) => {
+    if (data.columns.length <= 1) {
+      alert("Cannot delete the last column");
+      return;
+    }
+
+    if (window.confirm("Are you sure you want to delete this column?")) {
+      setData(prev => ({
+        ...prev,
+        columns: prev.columns.filter(col => col.id !== columnId),
+        rows: prev.rows.map(row => {
+          const { [columnId]: deleted, ...rest } = row;
+          return rest;
+        }),
+      }));
+
+      loadedRowsRef.current = loadedRowsRef.current.map(row => {
+        const { [columnId]: deleted, ...rest } = row;
+        return rest;
+      });
+    }
+  };
+
+  const handleHideField = (columnId: string) => {
+    console.log("Hide field:", columnId);
+  };
+
+  const handleSort = (columnId: string, direction: "asc" | "desc") => {
+    const sortedRows = [...data.rows].sort((a, b) => {
+      const aVal = a[columnId];
+      const bVal = b[columnId];
+      
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return direction === "asc" 
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+      
+      return direction === "asc" 
+        ? (aVal || 0) - (bVal || 0)
+        : (bVal || 0) - (aVal || 0);
+    });
+
+    setData(prev => ({
+      ...prev,
+      rows: sortedRows,
+    }));
+
+    allRowsRef.current = sortedRows;
+    loadedRowsRef.current = sortedRows.slice(0, 100);
+    currentPageRef.current = 1;
+  };
+
+  const handleGroupBy = (columnId: string) => {
+    console.log("Group by field:", columnId);
+  };
 
   const TextFilterComponent = ({ columnId, columnName }: { columnId: string; columnName: string }) => {
     const [operator, setOperator] = useState<TextFilterOperator>("contains");
@@ -415,12 +985,12 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
         id: column.id,
         accessorKey: column.id,
         header: () => (
-          <div className="column-header">
+          <div className="column-header" style={{ position: 'relative' }}>
             <div className="column-title">
               <span className="column-name">{column.name}</span>
               <span className="column-type">({column.type})</span>
             </div>
-            <div className="column-filter-section">
+            <div className="column-actions" style={{ display: 'flex', gap: '4px' }}>
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
@@ -428,11 +998,48 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                 }}
                 className={`filter-btn ${columnFilters.length > 0 ? 'active' : ''}`}
                 title="Filter column"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  borderRadius: '4px',
+                  fontSize: '12px'
+                }}
               >
-                ⚙️
+                
                 {columnFilters.length > 0 && (
-                  <span className="filter-count">{columnFilters.length}</span>
+                  <span className="filter-count" style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    background: '#1a73e8',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '16px',
+                    height: '16px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {columnFilters.length}
+                  </span>
                 )}
+              </button>
+              <button
+                onClick={(e) => handleFieldMenuOpen(column.id, e)}
+                title="Field options"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  borderRadius: '4px',
+                  fontSize: '12px'
+                }}
+              >
+                ⋮
               </button>
             </div>
             
@@ -457,25 +1064,19 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
           const isEditing = editingCell?.rowId === rowId && editingCell.columnId === column.id;
 
           const handleCellUpdate = (newValue: any) => {
-            // Update all rows reference
-            allRowsRef.current = allRowsRef.current.map(row =>
-              row.id === rowId 
-                ? { ...row, [column.id]: newValue }
-                : row
-            );
-            
-            // Update loaded rows
+            setData(prev => ({
+              ...prev,
+              rows: prev.rows.map(row => 
+                row.id === rowId 
+                  ? { ...row, [column.id]: newValue }
+                  : row
+              ),
+            }));
             loadedRowsRef.current = loadedRowsRef.current.map(row =>
               row.id === rowId 
                 ? { ...row, [column.id]: newValue }
                 : row
             );
-            
-            // Update state
-            setData(prev => ({
-              ...prev,
-              rows: allRowsRef.current,
-            }));
           };
 
           if (isEditing) {
@@ -512,7 +1113,6 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                   padding: '8px 12px',
                   margin: 0,
                   font: 'inherit',
-                  boxSizing: 'border-box',
                 }}
                 onFocus={(e) => e.target.select()}
               />
@@ -533,7 +1133,6 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                 display: "flex",
                 alignItems: "center",
                 width: '100%',
-                boxSizing: 'border-box',
               }}
             >
               {value}
@@ -563,18 +1162,18 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
       type: newColumnType,
     };
 
-    const updatedRows = allRowsRef.current.map(row => ({
-      ...row,
-      [newColumn.id]: newColumnType === "number" ? 0 : "",
-    }));
-
-    allRowsRef.current = updatedRows;
-    loadedRowsRef.current = updatedRows.slice(0, 100);
-
     setData(prev => ({
       ...prev,
       columns: [...prev.columns, newColumn],
-      rows: updatedRows,
+      rows: prev.rows.map(row => ({
+        ...row,
+        [newColumn.id]: newColumnType === "number" ? 0 : "",
+      })),
+    }));
+
+    loadedRowsRef.current = loadedRowsRef.current.map(row => ({
+      ...row,
+      [newColumn.id]: newColumnType === "number" ? 0 : "",
     }));
 
     setNewColumnName("");
@@ -588,68 +1187,59 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
       newRow[column.id] = column.type === "number" ? 0 : "";
     });
 
-    const updatedRows = [...allRowsRef.current, newRow];
-    allRowsRef.current = updatedRows;
-    loadedRowsRef.current = updatedRows.slice(0, 100);
-
     setData(prev => ({
       ...prev,
-      rows: updatedRows,
+      rows: [...prev.rows, newRow],
     }));
+    
+    loadedRowsRef.current = [...loadedRowsRef.current, newRow];
   };
 
-  // FIXED: Add 100k rows with better memory management
   const add100kRows = async () => {
     setIsAddingBulkRows(true);
     
-    // Use requestAnimationFrame to avoid blocking
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       const bulkRows = createBulkRows(data.columns, 100000);
-      const updatedRows = [...allRowsRef.current, ...bulkRows];
       
-      // Update references
-      allRowsRef.current = updatedRows;
-      loadedRowsRef.current = updatedRows.slice(0, 100);
-      currentPageRef.current = 1;
-      setHasMore(true);
-      
-      // Update state with minimal data
-      setData(prev => ({
-        ...prev,
-        rows: updatedRows,
+      setData(prevData => ({
+        ...prevData,
+        rows: [...prevData.rows, ...bulkRows],
       }));
       
+      loadedRowsRef.current = [...data.rows, ...bulkRows.slice(0, 100)];
+      currentPageRef.current = 1;
+      setHasMore(true);
       setIsAddingBulkRows(false);
-    });
+    }, 100);
   };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!editingCell) return;
 
-      const currentRowIndex = allRowsRef.current.findIndex(row => row.id === editingCell.rowId);
+      const currentRowIndex = data.rows.findIndex(row => row.id === editingCell.rowId);
       const currentColIndex = data.columns.findIndex(col => col.id === editingCell.columnId);
 
       if (e.key === "ArrowUp" && currentRowIndex > 0) {
         e.preventDefault();
-        const prevRow = allRowsRef.current[currentRowIndex - 1];
+        const prevRow = data.rows[currentRowIndex - 1];
         setEditingCell({ rowId: prevRow.id, columnId: editingCell.columnId });
         setEditValue(String(prevRow[editingCell.columnId] || ""));
-      } else if (e.key === "ArrowDown" && currentRowIndex < allRowsRef.current.length - 1) {
+      } else if (e.key === "ArrowDown" && currentRowIndex < data.rows.length - 1) {
         e.preventDefault();
-        const nextRow = allRowsRef.current[currentRowIndex + 1];
+        const nextRow = data.rows[currentRowIndex + 1];
         setEditingCell({ rowId: nextRow.id, columnId: editingCell.columnId });
         setEditValue(String(nextRow[editingCell.columnId] || ""));
       } else if (e.key === "ArrowLeft" && currentColIndex > 0) {
         e.preventDefault();
         const prevCol = data.columns[currentColIndex - 1];
         setEditingCell({ rowId: editingCell.rowId, columnId: prevCol.id });
-        setEditValue(String(allRowsRef.current[currentRowIndex][prevCol.id] || ""));
+        setEditValue(String(data.rows[currentRowIndex][prevCol.id] || ""));
       } else if (e.key === "ArrowRight" && currentColIndex < data.columns.length - 1) {
         e.preventDefault();
         const nextCol = data.columns[currentColIndex + 1];
         setEditingCell({ rowId: editingCell.rowId, columnId: nextCol.id });
-        setEditValue(String(allRowsRef.current[currentRowIndex][nextCol.id] || ""));
+        setEditValue(String(data.rows[currentRowIndex][nextCol.id] || ""));
       }
     };
 
@@ -768,7 +1358,33 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
         );
       })()}
 
-      {/* Virtualized Table - FIXED HEIGHT AND MEMORY */}
+      {/* Field Dropdown Menu */}
+      {activeFieldDropdown && (() => {
+        const column = data.columns.find(col => col.id === activeFieldDropdown);
+        if (!column) return null;
+        
+        return (
+          <FieldDropdownMenu
+            columnId={column.id}
+            columnName={column.name}
+            columnType={column.type}
+            isOpen={true}
+            onClose={handleFieldMenuClose}
+            position={dropdownPosition}
+            onAddFilter={addFilter}
+            onEditField={handleEditField}
+            onDuplicateField={handleDuplicateField}
+            onInsertLeft={handleInsertLeft}
+            onInsertRight={handleInsertRight}
+            onDeleteField={handleDeleteField}
+            onHideField={handleHideField}
+            onSort={handleSort}
+            onGroupBy={handleGroupBy}
+          />
+        );
+      })()}
+
+      {/* Virtualized Table */}
       <div 
         ref={tableContainerRef}
         className="table-container"
@@ -861,7 +1477,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                     transform: `translateY(${virtualRow.start}px)`,
                     display: 'table',
                     tableLayout: 'fixed',
-                    height: '40px', // Fixed height
+                    height: '40px',
                   }}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -873,7 +1489,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                         padding: '8px 12px',
                         border: '1px solid #e2e8f0',
                         verticalAlign: 'middle',
-                        height: '40px', // Fixed height
+                        height: '40px',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -933,7 +1549,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
 
       {/* Table Info */}
       <div className="table-info">
-        <span>{filteredData.length} rows displayed ({allRowsRef.current.length} total)</span>
+        <span>{filteredData.length} rows displayed ({data.rows.length} total)</span>
         <span>{data.columns.length} columns</span>
         {filters.length > 0 && <span>{filters.length} active filters</span>}
         {searchTerm && <span>Search: "{searchTerm}"</span>}

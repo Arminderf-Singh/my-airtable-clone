@@ -1,18 +1,10 @@
-import UpgradeBanner from './_components/UpgradeBanner';
-import ActionCards from './_components/ActionCards';
-import RecentlyOpened from './_components/RecentlyOpened';
-import styles from './styles/home.module.css';
+import { DataTable } from "~/components/DataTable";
+import "~/styles/datatable.css";
 
-export default function HomePage() {
+export default function TablePage() {
   return (
-    <div className={styles.homePage}>
-      <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Home</h1>
-      </div>
-      
-      <UpgradeBanner />
-      <ActionCards />
-      <RecentlyOpened />
+    <div className="table-page-container">
+      <DataTable />
     </div>
   );
 }

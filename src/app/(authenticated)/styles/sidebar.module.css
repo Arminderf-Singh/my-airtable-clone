@@ -2,38 +2,52 @@
   width: 240px;
   background-color: #fafbfc;
   border-right: 1px solid #e1e5e9;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
   display: flex;
   flex-direction: column;
-  height: 100vh;
 }
 
 .sidebarContent {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 16px;
+  padding: 16px 0;
 }
 
 .logoSection {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 8px;
+  gap: 12px;
+  padding: 0 20px 16px;
+  border-bottom: 1px solid #e1e5e9;
   margin-bottom: 16px;
 }
 
 .logo {
-  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #0052cc, #0066ff);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .logoText {
-  font-weight: 600;
-  font-size: 14px;
-  color: #42526e;
+  font-size: 16px;
+  font-weight: 700;
+  color: #172b4d;
 }
 
 .navigation {
   flex: 1;
+  padding: 0 12px;
 }
 
 .navItem {
@@ -41,27 +55,44 @@
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  margin-bottom: 4px;
-  font-size: 14px;
   color: #42526e;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-bottom: 4px;
 }
 
 .navItem:hover {
-  background-color: #ebecf0;
+  background-color: #f0f2f5;
+  color: #172b4d;
 }
 
 .navItem.active {
-  background-color: #e1e5e9;
-  color: #172b4d;
-  font-weight: 500;
+  background-color: #e6f0ff;
+  color: #0052cc;
+  font-weight: 600;
 }
 
 .navIcon {
-  font-size: 16px;
-  width: 20px;
-  text-align: center;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.navItem:nth-child(1) .navIcon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'%3E%3C/path%3E%3Cpolyline points='9 22 9 12 15 12 15 22'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.navItem:nth-child(2) .navIcon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'%3E%3C/polygon%3E%3C/svg%3E");
+}
+
+.navItem:nth-child(3) .navIcon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='9' cy='7' r='4'%3E%3C/circle%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'%3E%3C/path%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'%3E%3C/path%3E%3C/svg%3E");
 }
 
 .section {
@@ -72,55 +103,68 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 0 12px 8px;
   font-size: 12px;
   font-weight: 600;
   color: #6b778c;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .addButton {
   background: none;
   border: none;
-  font-size: 16px;
-  cursor: pointer;
   color: #6b778c;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 3px;
+  font-size: 16px;
+  transition: color 0.2s ease;
 }
 
 .addButton:hover {
-  color: #42526e;
+  color: #172b4d;
 }
 
 .bottomLinks {
-  margin-top: auto;
-  padding: 16px 0;
+  padding: 16px 12px 0;
   border-top: 1px solid #e1e5e9;
+  margin-top: auto;
 }
 
 .bottomLink {
   padding: 8px 12px;
-  font-size: 14px;
   color: #42526e;
+  font-size: 14px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
 }
 
 .bottomLink:hover {
-  background-color: #ebecf0;
+  background-color: #f0f2f5;
+  color: #172b4d;
 }
 
 .createButton {
-  background-color: #0052cc;
+  margin: 16px 12px 0;
+  background: linear-gradient(135deg, #0052cc, #0066ff);
   color: white;
   border: none;
-  padding: 12px 16px;
+  padding: 10px 16px;
   border-radius: 6px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  margin-top: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .createButton:hover {
-  background-color: #0041a8;
+  background: linear-gradient(135deg, #0041a8, #0052cc);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 82, 204, 0.3);
 }

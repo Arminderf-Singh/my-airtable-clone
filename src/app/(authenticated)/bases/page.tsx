@@ -1,85 +1,198 @@
 import { redirect } from "next/navigation";
 import { getSession } from "~/lib/auth";
-import { api } from "~/trpc/server";
 import Link from "next/link";
-import { CreateBaseForm } from "~/components/CreateBaseForm";
 import styles from "./bases.module.css";
 
-// Define BaseCard FIRST
-function BaseCard({ base }: { base: any }) {
-  return (
-    <Link
-      href={`/base/${base.id}`}
-      className={styles.baseCard}
-    >
-      <div className={styles.baseIcon}>📊</div>
-      <div className={styles.baseContent}>
-        <h3 className={styles.baseName}>{base.name}</h3>
-        <p className={styles.baseMeta}>
-          {base.tables?.length ?? 0} table{base.tables?.length !== 1 ? "s" : ""}
-        </p>
-      </div>
-    </Link>
-  );
-}
+// Mock data for recently opened items
+const todayItems = [
+  {
+    id: "1",
+    name: "Untitled Base",
+    type: "base",
+    lastOpened: "just now",
+    icon: "📊",
+    color: "#0052cc"
+  }
+];
 
-export default async function BasesPage() {
+const pastWeekItems = [
+  {
+    id: "2", 
+    name: "Lyra Project Tracker",
+    type: "base",
+    lastOpened: "yesterday",
+    icon: "🚀",
+    color: "#27ae60"
+  },
+  {
+    id: "3",
+    name: "Marketing Campaigns",
+    type: "base", 
+    lastOpened: "2 days ago",
+    icon: "📈",
+    color: "#9b51e0"
+  },
+  {
+    id: "4",
+    name: "Content Calendar",
+    type: "base",
+    lastOpened: "3 days ago", 
+    icon: "📅",
+    color: "#ff6b6b"
+  }
+];
+
+const quickActions = [
+  {
+    title: "Import data",
+    description: "Bring your data into Airtable",
+    icon: "📤",
+    color: "blue",
+    href: "/import"
+  },
+  {
+    title: "Create a base",
+    description: "Start from scratch",
+    icon: "🆕", 
+    color: "purple",
+    href: "/bases/create"
+  },
+  {
+    title: "Use a template",
+    description: "Start from a template",
+    icon: "📋",
+    color: "green",
+    href: "/templates"
+  },
+  {
+    title: "Learn Airtable",
+    description: "Get started with guides",
+    icon: "🎓",
+    color: "pink",
+    href: "/learn"
+  }
+];
+
+export default async function HomePage() {
   const session = await getSession();
 
   if (!session) {
     redirect("/api/auth/signin");
   }
 
-  let bases = [];
-  try {
-    const caller = await api();
-    bases = await caller.base.list();
-  } catch (error) {
-    console.error("Error fetching bases:", error);
-    bases = [];
-  }
-
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.title}>Your Bases</h1>
-          <p className={styles.subtitle}>Create and manage your bases</p>
-        </div>
-        <div className={styles.headerActions}>
-          <Link 
-            href="/table"
-            className={styles.demoButton}
-          >
-            View Table Demo
-          </Link>
-          <CreateBaseForm />
-        </div>
+    <div className={styles.homePage}>
+      {/* Page Header */}
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>Home</h1>
       </div>
-      
-      {bases.length === 0 ? (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>📁</div>
-          <h2 className={styles.emptyTitle}>No bases yet</h2>
-          <p className={styles.emptyDescription}>
-            Create your first base to start organizing your data
-          </p>
-          <div className={styles.emptyActions}>
-            <Link 
-              href="/table"
-              className={styles.tryDemoButton}
-            >
-              Try Table Demo
-            </Link>
+
+      {/* Upgrade Banner */}
+      <div className={styles.upgradeBanner}>
+        <div className={styles.bannerContent}>
+          <div className={styles.bannerText}>
+            <div className={styles.bannerMainText}>
+              Your trial ends in <strong>13 days</strong>
+            </div>
+            <div className={styles.bannerSubtext}>
+              Upgrade to keep your bases and access premium features
+            </div>
+          </div>
+          <div className={styles.bannerActions}>
+            <button className={styles.upgradeButton}>
+              Upgrade
+            </button>
+            <a href="#" className={styles.compareLink}>
+              Compare plans
+            </a>
           </div>
         </div>
-      ) : (
-        <div className={styles.basesGrid}>
-          {bases.map((base) => (
-            <BaseCard key={base.id} base={base} />
+      </div>
+
+      {/* Quick Actions */}
+      <div className={styles.actionSection}>
+        <h2 className={styles.sectionTitle}>Quick actions</h2>
+        <div className={styles.actionCards}>
+          {quickActions.map((action, index) => (
+            <Link 
+              key={index}
+              href={action.href}
+              className={`${styles.actionCard} ${styles[action.color]}`}
+            >
+              <div className={styles.cardIcon}>
+                {action.icon}
+              </div>
+              <h3 className={styles.cardTitle}>{action.title}</h3>
+              <p className={styles.cardDescription}>{action.description}</p>
+            </Link>
           ))}
         </div>
-      )}
+      </div>
+
+      {/* Recently Opened - Main Section */}
+      <div className={styles.recentlyOpenedSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Recently opened</h2>
+          <button className={styles.viewAllButton}>
+            View all
+          </button>
+        </div>
+        
+        {/* Today Subsection */}
+        <div className={styles.timeSection}>
+          <h3 className={styles.timeSectionTitle}>Today</h3>
+          <div className={styles.baseCardsGrid}>
+            {todayItems.length > 0 ? (
+              todayItems.map((item) => (
+                <BaseCard key={item.id} item={item} />
+              ))
+            ) : (
+              <div className={styles.emptySection}>
+                No bases opened today
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Past 7 Days Subsection */}
+        <div className={styles.timeSection}>
+          <h3 className={styles.timeSectionTitle}>Past 7 days</h3>
+          <div className={styles.baseCardsGrid}>
+            {pastWeekItems.length > 0 ? (
+              pastWeekItems.map((item) => (
+                <BaseCard key={item.id} item={item} />
+              ))
+            ) : (
+              <div className={styles.emptySection}>
+                No bases opened in the past 7 days
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
+  );
+}
+
+// Base Card Component (similar to your bases page)
+function BaseCard({ item }: { item: any }) {
+  return (
+    <Link
+      href={`/base/${item.id}`}
+      className={styles.baseCard}
+    >
+      <div 
+        className={styles.baseIcon}
+        style={{ backgroundColor: item.color }}
+      >
+        {item.icon}
+      </div>
+      <div className={styles.baseContent}>
+        <h3 className={styles.baseName}>{item.name}</h3>
+        <p className={styles.baseMeta}>
+          Opened {item.lastOpened}
+        </p>
+      </div>
+    </Link>
   );
 }

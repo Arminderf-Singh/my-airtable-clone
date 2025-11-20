@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from '../styles/header.module.css';
 
 export default function Header() {
@@ -29,9 +30,9 @@ export default function Header() {
       
       {/* Right Section */}
       <div className={styles.rightSection}>
-        <button className={styles.tryDemoButton}>
+        <Link href="/table" className={styles.tryDemoButton}>
           Try demo
-        </button>
+        </Link>
         <button className={styles.iconButton}>
           <span className={styles.helpIcon}>?</span>
         </button>
