@@ -10,7 +10,6 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { faker } from "@faker-js/faker";
 
-// Types
 type ColumnType = "text" | "number";
 type TextFilterOperator = "contains" | "notContains" | "equals" | "isEmpty" | "isNotEmpty";
 type NumberFilterOperator = "gt" | "lt" | "equals" | "gte" | "lte" | "isEmpty" | "isNotEmpty";
@@ -38,7 +37,7 @@ interface DataTableProps {
   onTableUpdate?: (table: TableData) => void;
 }
 
-// Filter types
+
 interface BaseFilter {
   id: string;
   columnId: string;
@@ -59,7 +58,6 @@ interface NumberFilter extends BaseFilter {
 
 type Filter = TextFilter | NumberFilter;
 
-// Field Dropdown Menu Component
 function FieldDropdownMenu({
   columnId,
   columnName,
@@ -263,7 +261,7 @@ function FieldDropdownMenu({
         fontSize: '14px',
       }}
     >
-      {/* Header */}
+      {}
       <div style={{
         padding: '12px 16px',
         borderBottom: '1px solid #f0f0f0',
@@ -288,7 +286,7 @@ function FieldDropdownMenu({
         </button>
       </div>
 
-      {/* Active Section (Filter/Edit) */}
+      {}
       {activeSection === "filter" && (
         <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
           <div style={{ marginBottom: '12px', fontWeight: '500' }}>Filter by {columnName}</div>
@@ -416,7 +414,7 @@ function FieldDropdownMenu({
         </div>
       )}
 
-      {/* Main Menu Sections */}
+      {}
       <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
         {menuSections.map((section, index) => (
           <div key={section.title}>
@@ -466,7 +464,6 @@ function FieldDropdownMenu({
   );
 }
 
-// Create default table with sample data
 const createDefaultTable = (tableName: string = "New Table"): TableData => {
   const defaultColumns: Column[] = [
     { id: "name", name: "Name", type: "text" },
@@ -491,10 +488,10 @@ const createDefaultTable = (tableName: string = "New Table"): TableData => {
   };
 };
 
-// Create 100k rows for performance testing
 const createBulkRows = (columns: Column[], count: number = 100000): TableRow[] => {
-  return Array.from({ length: count }, (_, index) => {
-    const row: TableRow = { id: `bulk-row-${index}` };
+  const rows: TableRow[] = [];
+  for (let i = 0; i < count; i++) {
+    const row: TableRow = { id: `bulk-row-${i}` };
     
     columns.forEach(column => {
       switch (column.type) {
@@ -509,22 +506,22 @@ const createBulkRows = (columns: Column[], count: number = 100000): TableRow[] =
       }
     });
     
-    return row;
-  });
+    rows.push(row);
+  }
+  return rows;
 };
 
 export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
   const [data, setData] = useState<TableData>(initialData || createDefaultTable());
   const [editingCell, setEditingCell] = useState<{ rowId: string; columnId: string } | null>(null);
   const [editValue, setEditValue] = useState("");
-  const [newColumnName, setNewColumnName] = useState("");
-  const [newColumnType, setNewColumnType] = useState<ColumnType>("text");
   const [isAddingBulkRows, setIsAddingBulkRows] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<Filter[]>([]);
   const [activeFilterColumn, setActiveFilterColumn] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  
   const [activeFieldDropdown, setActiveFieldDropdown] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   
@@ -533,7 +530,6 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
   const loadedRowsRef = useRef<TableRow[]>([]);
   const allRowsRef = useRef<TableRow[]>([]);
 
-  // Initialize with first batch of rows
   useEffect(() => {
     if (data.rows.length > 0) {
       allRowsRef.current = data.rows;
@@ -543,13 +539,11 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
     }
   }, [data.id]);
 
-  // Load more data function
   const loadMoreData = useCallback(async () => {
     if (isLoading || !hasMore) return;
     
     setIsLoading(true);
-    
-    // Simulate API call delay
+
     await new Promise(resolve => setTimeout(resolve, 50));
     
     const startIndex = currentPageRef.current * 100;
@@ -567,7 +561,6 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
     
     setIsLoading(false);
     
-    // Trigger re-render
     setData(prev => ({ ...prev }));
   }, [isLoading, hasMore]);
 
@@ -669,18 +662,16 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
     return result;
   }, [tableData, searchTerm, filters]);
 
-  // Virtualizer for performance
   const rowVirtualizer = useVirtualizer({
     count: filteredData.length,
     getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 40,
-    overscan: 5,
+    estimateSize: () => 40, 
+    overscan: 5, 
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
   const totalSize = rowVirtualizer.getTotalSize();
 
-  // Check if we need to load more data when scrolling
   useEffect(() => {
     const virtualItems = rowVirtualizer.getVirtualItems();
     if (virtualItems.length === 0) return;
@@ -718,7 +709,6 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
     return filters.filter(filter => filter.columnId === columnId);
   }, [filters]);
 
-  // Field Dropdown Handlers
   const handleFieldMenuOpen = (columnId: string, event: React.MouseEvent) => {
     event.stopPropagation();
     const rect = event.currentTarget.getBoundingClientRect();
@@ -727,7 +717,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
       left: rect.left + window.scrollX
     });
     setActiveFieldDropdown(columnId);
-    setActiveFilterColumn(null);
+    setActiveFilterColumn(null); 
   };
 
   const handleFieldMenuClose = () => {
@@ -881,6 +871,66 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
     console.log("Group by field:", columnId);
   };
 
+  const addNewField = () => {
+    const newColumn: Column = {
+      id: `col-${Date.now()}`,
+      name: "New Field",
+      type: "text",
+    };
+
+    const updatedRows = allRowsRef.current.map(row => ({
+      ...row,
+      [newColumn.id]: newColumn.type === "number" ? 0 : "",
+    }));
+
+    allRowsRef.current = updatedRows;
+    loadedRowsRef.current = updatedRows.slice(0, 100);
+
+    setData(prev => ({
+      ...prev,
+      columns: [...prev.columns, newColumn],
+      rows: updatedRows,
+    }));
+  };
+
+  const addNewRow = () => {
+    const newRow: TableRow = { id: `row-${Date.now()}` };
+    
+    data.columns.forEach(column => {
+      newRow[column.id] = column.type === "number" ? 0 : "";
+    });
+
+    const updatedRows = [...allRowsRef.current, newRow];
+    allRowsRef.current = updatedRows;
+    loadedRowsRef.current = updatedRows.slice(0, 100);
+
+    setData(prev => ({
+      ...prev,
+      rows: updatedRows,
+    }));
+  };
+
+  const add100kRows = async () => {
+    setIsAddingBulkRows(true);
+    
+    requestAnimationFrame(() => {
+      const bulkRows = createBulkRows(data.columns, 100000);
+      const updatedRows = [...allRowsRef.current, ...bulkRows];
+      
+      allRowsRef.current = updatedRows;
+      loadedRowsRef.current = updatedRows.slice(0, 100);
+      currentPageRef.current = 1;
+      setHasMore(true);
+      
+      setData(prev => ({
+        ...prev,
+        rows: updatedRows,
+      }));
+      
+      setIsAddingBulkRows(false);
+    });
+  };
+
   const TextFilterComponent = ({ columnId, columnName }: { columnId: string; columnName: string }) => {
     const [operator, setOperator] = useState<TextFilterOperator>("contains");
     const [value, setValue] = useState("");
@@ -1007,13 +1057,13 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                   fontSize: '12px'
                 }}
               >
-                
+                ⚙️
                 {columnFilters.length > 0 && (
                   <span className="filter-count" style={{
                     position: 'absolute',
                     top: '-4px',
                     right: '-4px',
-                    background: '#1a73e8',
+                    background: '#0052cc',
                     color: 'white',
                     borderRadius: '50%',
                     width: '16px',
@@ -1064,19 +1114,22 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
           const isEditing = editingCell?.rowId === rowId && editingCell.columnId === column.id;
 
           const handleCellUpdate = (newValue: any) => {
-            setData(prev => ({
-              ...prev,
-              rows: prev.rows.map(row => 
-                row.id === rowId 
-                  ? { ...row, [column.id]: newValue }
-                  : row
-              ),
-            }));
+            allRowsRef.current = allRowsRef.current.map(row =>
+              row.id === rowId 
+                ? { ...row, [column.id]: newValue }
+                : row
+            );
+      
             loadedRowsRef.current = loadedRowsRef.current.map(row =>
               row.id === rowId 
                 ? { ...row, [column.id]: newValue }
                 : row
             );
+         
+            setData(prev => ({
+              ...prev,
+              rows: allRowsRef.current,
+            }));
           };
 
           if (isEditing) {
@@ -1113,6 +1166,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                   padding: '8px 12px',
                   margin: 0,
                   font: 'inherit',
+                  boxSizing: 'border-box',
                 }}
                 onFocus={(e) => e.target.select()}
               />
@@ -1133,6 +1187,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                 display: "flex",
                 alignItems: "center",
                 width: '100%',
+                boxSizing: 'border-box',
               }}
             >
               {value}
@@ -1153,93 +1208,33 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
 
   const { rows } = table.getRowModel();
 
-  const addNewColumn = () => {
-    if (!newColumnName.trim()) return;
-
-    const newColumn: Column = {
-      id: `col-${Date.now()}`,
-      name: newColumnName,
-      type: newColumnType,
-    };
-
-    setData(prev => ({
-      ...prev,
-      columns: [...prev.columns, newColumn],
-      rows: prev.rows.map(row => ({
-        ...row,
-        [newColumn.id]: newColumnType === "number" ? 0 : "",
-      })),
-    }));
-
-    loadedRowsRef.current = loadedRowsRef.current.map(row => ({
-      ...row,
-      [newColumn.id]: newColumnType === "number" ? 0 : "",
-    }));
-
-    setNewColumnName("");
-    setNewColumnType("text");
-  };
-
-  const addNewRow = () => {
-    const newRow: TableRow = { id: `row-${Date.now()}` };
-    
-    data.columns.forEach(column => {
-      newRow[column.id] = column.type === "number" ? 0 : "";
-    });
-
-    setData(prev => ({
-      ...prev,
-      rows: [...prev.rows, newRow],
-    }));
-    
-    loadedRowsRef.current = [...loadedRowsRef.current, newRow];
-  };
-
-  const add100kRows = async () => {
-    setIsAddingBulkRows(true);
-    
-    setTimeout(() => {
-      const bulkRows = createBulkRows(data.columns, 100000);
-      
-      setData(prevData => ({
-        ...prevData,
-        rows: [...prevData.rows, ...bulkRows],
-      }));
-      
-      loadedRowsRef.current = [...data.rows, ...bulkRows.slice(0, 100)];
-      currentPageRef.current = 1;
-      setHasMore(true);
-      setIsAddingBulkRows(false);
-    }, 100);
-  };
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!editingCell) return;
 
-      const currentRowIndex = data.rows.findIndex(row => row.id === editingCell.rowId);
+      const currentRowIndex = allRowsRef.current.findIndex(row => row.id === editingCell.rowId);
       const currentColIndex = data.columns.findIndex(col => col.id === editingCell.columnId);
 
       if (e.key === "ArrowUp" && currentRowIndex > 0) {
         e.preventDefault();
-        const prevRow = data.rows[currentRowIndex - 1];
+        const prevRow = allRowsRef.current[currentRowIndex - 1];
         setEditingCell({ rowId: prevRow.id, columnId: editingCell.columnId });
         setEditValue(String(prevRow[editingCell.columnId] || ""));
-      } else if (e.key === "ArrowDown" && currentRowIndex < data.rows.length - 1) {
+      } else if (e.key === "ArrowDown" && currentRowIndex < allRowsRef.current.length - 1) {
         e.preventDefault();
-        const nextRow = data.rows[currentRowIndex + 1];
+        const nextRow = allRowsRef.current[currentRowIndex + 1];
         setEditingCell({ rowId: nextRow.id, columnId: editingCell.columnId });
         setEditValue(String(nextRow[editingCell.columnId] || ""));
       } else if (e.key === "ArrowLeft" && currentColIndex > 0) {
         e.preventDefault();
         const prevCol = data.columns[currentColIndex - 1];
         setEditingCell({ rowId: editingCell.rowId, columnId: prevCol.id });
-        setEditValue(String(data.rows[currentRowIndex][prevCol.id] || ""));
+        setEditValue(String(allRowsRef.current[currentRowIndex][prevCol.id] || ""));
       } else if (e.key === "ArrowRight" && currentColIndex < data.columns.length - 1) {
         e.preventDefault();
         const nextCol = data.columns[currentColIndex + 1];
         setEditingCell({ rowId: editingCell.rowId, columnId: nextCol.id });
-        setEditValue(String(data.rows[currentRowIndex][nextCol.id] || ""));
+        setEditValue(String(allRowsRef.current[currentRowIndex][nextCol.id] || ""));
       }
     };
 
@@ -1261,75 +1256,114 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
 
   return (
     <div className="data-table-container">
-      {/* Table Header */}
-      <div className="table-header">
-        <div className="table-title-section">
-          <h2 className="table-title">{data.name}</h2>
-          <button 
-            onClick={() => createNewTable(`Table ${Date.now()}`)}
-            className="new-table-btn"
-          >
-            New Table
-          </button>
+      {}
+      <div className="airtable-header">
+        <div className="header-left">
+          <div className="workspace-tabs">
+            <button className="tab active">Table 1</button>
+            <button className="tab-add">+</button>
+          </div>
+          <div className="add-import-section">
+            <button className="add-import-btn">
+              <span>Add or import</span>
+              <span className="plus-icon">+</span>
+            </button>
+          </div>
         </div>
         
-        <div className="table-actions">
-          <div className="search-section">
-            <input
-              type="text"
-              placeholder="Search across all cells..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-          
-          <div className="filter-controls">
-            {filters.length > 0 && (
-              <button onClick={clearAllFilters} className="clear-filters-btn">
-                Clear All Filters ({filters.length})
-              </button>
-            )}
-          </div>
-          
-          <div className="add-column-form">
-            <input
-              type="text"
-              placeholder="New column name"
-              value={newColumnName}
-              onChange={(e) => setNewColumnName(e.target.value)}
-              className="column-input"
-              onKeyDown={(e) => e.key === "Enter" && addNewColumn()}
-            />
-            <select 
-              value={newColumnType} 
-              onChange={(e) => setNewColumnType(e.target.value as ColumnType)}
-              className="type-select"
-            >
-              <option value="text">Text</option>
-              <option value="number">Number</option>
-            </select>
-            <button onClick={addNewColumn} className="add-column-btn">
-              Add Column
+        <div className="header-right">
+          <div className="header-actions">
+            <button className="header-btn hide-fields" title="Hide fields">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+              </svg>
+            </button>
+            
+            <button className="header-btn filter" title="Filter">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+              </svg>
+            </button>
+            
+            <button className="header-btn group" title="Group">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 15h8v-2H3v2zm0 4h8v-2H3v2zm0 4h8v-2H3v2zm10 0h8v-2h-8v2zm0-10v2h8v-2h-8zm0 4h8v-2h-8v2z"/>
+              </svg>
+            </button>
+            
+            <button className="header-btn sort" title="Sort">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
+              </svg>
+            </button>
+            
+            <button className="header-btn color" title="Color">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-2a8 8 0 100-16 8 8 0 000 16z"/>
+              </svg>
             </button>
           </div>
           
-          <div className="row-actions">
-            <button onClick={addNewRow} className="add-row-btn">
-              Add Row
+          <div className="header-divider"></div>
+          
+          <div className="share-sync-section">
+            <button className="header-btn share" title="Share">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+              </svg>
+              Share
             </button>
-            <button 
-              onClick={add100kRows} 
-              className="add-bulk-btn"
-              disabled={isAddingBulkRows}
-            >
-              {isAddingBulkRows ? "Adding..." : "Add 100k Rows"}
+            
+            <button className="header-btn sync" title="Sync">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+              </svg>
             </button>
+          </div>
+          
+          <div className="tools-menu">
+            <button className="tools-btn">Tools</button>
           </div>
         </div>
       </div>
 
-      {/* Filter Popover */}
+      {}
+      <div className="table-toolbar">
+  <div className="toolbar-left">
+    <div className="search-section">
+      <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search across all cells..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="search-input"
+      />
+    </div>
+    
+    {}
+    <button 
+      className="new-table-btn"
+      onClick={() => createNewTable(`Table ${Date.now()}`)}
+    >
+      New Table
+    </button>
+  </div>
+  
+  <div className="toolbar-right">
+    <button 
+      onClick={add100kRows} 
+      className="add-bulk-btn"
+      disabled={isAddingBulkRows}
+    >
+      {isAddingBulkRows ? "Adding..." : "Add 100k Rows"}
+    </button>
+  </div>
+</div>
+
+      {}
       {activeFilterColumn && (() => {
         const column = data.columns.find(col => col.id === activeFilterColumn);
         if (!column) return null;
@@ -1358,7 +1392,6 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
         );
       })()}
 
-      {/* Field Dropdown Menu */}
       {activeFieldDropdown && (() => {
         const column = data.columns.find(col => col.id === activeFieldDropdown);
         if (!column) return null;
@@ -1384,7 +1417,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
         );
       })()}
 
-      {/* Virtualized Table */}
+      {}
       <div 
         ref={tableContainerRef}
         className="table-container"
@@ -1439,6 +1472,32 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                     )}
                   </th>
                 ))}
+                {}
+                <th
+                  className="add-field-header"
+                  style={{
+                    width: '150px',
+                    padding: '8px 12px',
+                    border: '1px solid #e2e8f0',
+                    background: '#f8fafc',
+                    fontWeight: '600',
+                    textAlign: 'left',
+                    verticalAlign: 'middle',
+                    position: 'relative',
+                    height: '40px',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <button 
+                    className="add-field-btn"
+                    onClick={addNewField}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    Add Field
+                  </button>
+                </th>
               </tr>
             ))}
           </thead>
@@ -1448,9 +1507,9 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
               display: 'block',
             }}
           >
-            {/* Top spacer */}
+            {}
             <tr>
-              <td colSpan={data.columns.length} style={{ 
+              <td colSpan={data.columns.length + 1} style={{ 
                 height: `${virtualRows[0]?.start || 0}px`,
                 display: 'block',
                 padding: 0,
@@ -1458,7 +1517,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
               }} />
             </tr>
 
-            {/* Virtualized rows */}
+            {}
             {virtualRows.map((virtualRow) => {
               const row = rows[virtualRow.index];
               if (!row) return null;
@@ -1502,13 +1561,25 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                       )}
                     </td>
                   ))}
+                  {}
+                  <td
+                    className="table-cell"
+                    style={{
+                      width: '150px',
+                      padding: '8px 12px',
+                      border: '1px solid #e2e8f0',
+                      verticalAlign: 'middle',
+                      height: '40px',
+                      boxSizing: 'border-box',
+                    }}
+                  ></td>
                 </tr>
               );
             })}
 
-            {/* Bottom spacer */}
+            {}
             <tr>
-              <td colSpan={data.columns.length} style={{ 
+              <td colSpan={data.columns.length + 1} style={{ 
                 height: `${totalSize - (virtualRows[virtualRows.length - 1]?.end || 0)}px`,
                 display: 'block',
                 padding: 0,
@@ -1518,7 +1589,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
           </tbody>
         </table>
         
-        {/* Loading indicator */}
+        {}
         {isLoading && (
           <div style={{ 
             textAlign: 'center', 
@@ -1532,7 +1603,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
           </div>
         )}
         
-        {/* End of data message */}
+        {}
         {!hasMore && filteredData.length > 0 && (
           <div style={{ 
             textAlign: 'center', 
@@ -1547,9 +1618,9 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
         )}
       </div>
 
-      {/* Table Info */}
+      {}
       <div className="table-info">
-        <span>{filteredData.length} rows displayed ({data.rows.length} total)</span>
+        <span>{filteredData.length} rows displayed ({allRowsRef.current.length} total)</span>
         <span>{data.columns.length} columns</span>
         {filters.length > 0 && <span>{filters.length} active filters</span>}
         {searchTerm && <span>Search: "{searchTerm}"</span>}

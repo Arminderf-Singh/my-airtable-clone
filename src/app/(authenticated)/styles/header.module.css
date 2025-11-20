@@ -185,7 +185,7 @@
   cursor: pointer;
 }
 
-/* In your header.module.css, update the tryDemoButton styles */
+
 .tryDemoButton {
   background-color: #0052cc;
   color: white;
@@ -196,8 +196,8 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  text-decoration: none; /* Important for Link element */
-  display: inline-flex; /* For proper alignment */
+  text-decoration: none;
+  display: inline-flex; 
   align-items: center;
   justify-content: center;
 }
@@ -205,6 +205,6 @@
 .tryDemoButton:hover {
   background-color: #0041a8;
   transform: translateY(-1px);
-  text-decoration: none; /* Ensure no underline on hover */
-  color: white; /* Maintain white text on hover */
+  text-decoration: none; 
+  color: white; 
 }

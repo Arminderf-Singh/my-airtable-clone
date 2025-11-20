@@ -4,7 +4,7 @@ import styles from '../styles/header.module.css';
 export default function Header() {
   return (
     <header className={styles.header}>
-      {/* Left Section */}
+      {}
       <div className={styles.leftSection}>
         <button className={styles.hamburgerButton}>
           <span className={styles.hamburgerIcon}>☰</span>
@@ -15,7 +15,7 @@ export default function Header() {
         <h1 className={styles.pageTitle}>Home</h1>
       </div>
 
-      {/* Search Section */}
+      {}
       <div className={styles.searchSection}>
         <div className={styles.searchBar}>
           <span className={styles.searchIcon}></span>
@@ -28,7 +28,7 @@ export default function Header() {
         </div>
       </div>
       
-      {/* Right Section */}
+      {}
       <div className={styles.rightSection}>
         <Link href="/table" className={styles.tryDemoButton}>
           Try demo

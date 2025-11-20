@@ -3,14 +3,14 @@ import { getSession } from "~/lib/auth";
 import Link from "next/link";
 import styles from "./bases.module.css";
 
-// Mock data for recently opened items
+
 const todayItems = [
   {
     id: "1",
     name: "Untitled Base",
     type: "base",
     lastOpened: "just now",
-    icon: "📊",
+    icon: "",
     color: "#0052cc"
   }
 ];
@@ -21,7 +21,7 @@ const pastWeekItems = [
     name: "Lyra Project Tracker",
     type: "base",
     lastOpened: "yesterday",
-    icon: "🚀",
+    icon: "",
     color: "#27ae60"
   },
   {
@@ -29,7 +29,7 @@ const pastWeekItems = [
     name: "Marketing Campaigns",
     type: "base", 
     lastOpened: "2 days ago",
-    icon: "📈",
+    icon: "",
     color: "#9b51e0"
   },
   {
@@ -37,7 +37,7 @@ const pastWeekItems = [
     name: "Content Calendar",
     type: "base",
     lastOpened: "3 days ago", 
-    icon: "📅",
+    icon: "",
     color: "#ff6b6b"
   }
 ];
@@ -46,28 +46,28 @@ const quickActions = [
   {
     title: "Import data",
     description: "Bring your data into Airtable",
-    icon: "📤",
+    icon: "",
     color: "blue",
     href: "/import"
   },
   {
     title: "Create a base",
     description: "Start from scratch",
-    icon: "🆕", 
+    icon: "", 
     color: "purple",
     href: "/bases/create"
   },
   {
     title: "Use a template",
     description: "Start from a template",
-    icon: "📋",
+    icon: "",
     color: "green",
     href: "/templates"
   },
   {
     title: "Learn Airtable",
     description: "Get started with guides",
-    icon: "🎓",
+    icon: "",
     color: "pink",
     href: "/learn"
   }

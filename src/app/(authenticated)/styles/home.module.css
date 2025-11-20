@@ -15,7 +15,7 @@
   margin: 0;
 }
 
-/* Upgrade Banner */
+
 .upgradeBanner {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 12px;
@@ -82,7 +82,7 @@
   color: #f0f0f0;
 }
 
-/* Action Cards */
+
 .actionSection {
   margin-bottom: 40px;
 }
@@ -150,7 +150,7 @@
   color: #172b4d;
 }
 
-/* Recently Opened */
+
 .recentlyOpened {
   background-color: white;
   border-radius: 12px;

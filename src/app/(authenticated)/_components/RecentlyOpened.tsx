@@ -5,11 +5,11 @@ export default function RecentlyOpened() {
     {
       id: 1,
       title: 'Lyra Project Tracker',
-      icon: '📊',
+      icon: '',
       lastOpened: 'Opened 4 hours ago',
       color: '#7B61FF'
     },
-    // Add more items as needed
+   
   ];
 
   return (
@@ -35,7 +35,7 @@ export default function RecentlyOpened() {
           </div>
         ))}
         
-        {/* Empty state if no items */}
+        {}
         {recentItems.length === 0 && (
           <div className={styles.emptyRecent}>
             <div className={styles.emptyRecentIcon}>📁</div>

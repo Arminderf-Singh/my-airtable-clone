@@ -195,7 +195,6 @@
   box-shadow: 0 10px 25px -5px rgba(255, 107, 0, 0.4);
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
   .landing-page-header {
     flex-direction: column;
@@ -228,7 +227,7 @@
   }
 }
 
-/* Add these to your existing CSS */
+
 
 .signin-container {
   display: flex;
@@ -315,3 +314,9 @@
 .signup-link:hover {
   text-decoration: underline;
 }
+
+
+
+
+
+
