@@ -84,10 +84,11 @@ const createDefaultTable = (tableName: string = "New Table"): TableData => {
   };
 };
 
-// Create 100k rows for performance testing
+// Create rows in chunks to avoid blocking
 const createBulkRows = (columns: Column[], count: number = 100000): TableRow[] => {
-  return Array.from({ length: count }, (_, index) => {
-    const row: TableRow = { id: `bulk-row-${index}` };
+  const rows: TableRow[] = [];
+  for (let i = 0; i < count; i++) {
+    const row: TableRow = { id: `bulk-row-${i}` };
     
     columns.forEach(column => {
       switch (column.type) {
@@ -102,8 +103,9 @@ const createBulkRows = (columns: Column[], count: number = 100000): TableRow[] =
       }
     });
     
-    return row;
-  });
+    rows.push(row);
+  }
+  return rows;
 };
 
 export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
@@ -116,23 +118,69 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<Filter[]>([]);
   const [activeFilterColumn, setActiveFilterColumn] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   
   const tableContainerRef = useRef<HTMLDivElement>(null);
+  const currentPageRef = useRef(0);
+  const loadedRowsRef = useRef<TableRow[]>([]);
+  const allRowsRef = useRef<TableRow[]>([]);
+
+  // Initialize with first batch of rows
+  useEffect(() => {
+    if (data.rows.length > 0) {
+      allRowsRef.current = data.rows;
+      loadedRowsRef.current = data.rows.slice(0, 100);
+      currentPageRef.current = 1;
+      setHasMore(data.rows.length > 100);
+    }
+  }, [data.id]);
+
+  // Load more data function
+  const loadMoreData = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+    
+    setIsLoading(true);
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    const startIndex = currentPageRef.current * 100;
+    const endIndex = startIndex + 100;
+    const newRows = allRowsRef.current.slice(startIndex, endIndex);
+    
+    if (newRows.length === 0) {
+      setHasMore(false);
+      setIsLoading(false);
+      return;
+    }
+    
+    loadedRowsRef.current = [...loadedRowsRef.current, ...newRows];
+    currentPageRef.current += 1;
+    
+    setIsLoading(false);
+    
+    // Trigger re-render
+    setData(prev => ({ ...prev }));
+  }, [isLoading, hasMore]);
 
   const createNewTable = useCallback((tableName: string) => {
     const newTable = createDefaultTable(tableName);
     setData(newTable);
     setFilters([]);
+    setHasMore(true);
+    currentPageRef.current = 0;
+    loadedRowsRef.current = [];
+    allRowsRef.current = [];
     onTableUpdate?.(newTable);
   }, [onTableUpdate]);
 
-
   const tableData = useMemo(() => {
-    return data.rows.map(row => ({
+    return loadedRowsRef.current.map(row => ({
       ...row,
       _original: row
     }));
-  }, [data]);
+  }, [loadedRowsRef.current]);
 
   const filteredData = useMemo(() => {
     if (!searchTerm.trim() && filters.length === 0) return tableData;
@@ -177,7 +225,6 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
             const numValue = Number(value);
             
             if (isNaN(numValue)) {
-            
               if (numberFilter.operator === "isEmpty") {
                 return value === null || value === undefined || value === "";
               }
@@ -215,6 +262,29 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
     return result;
   }, [tableData, searchTerm, filters]);
 
+  // Fixed virtualizer with consistent row height
+  const rowVirtualizer = useVirtualizer({
+    count: filteredData.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => 40, // Fixed row height
+    overscan: 5, // Reduced overscan
+  });
+
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+
+  // Check if we need to load more data when scrolling
+  useEffect(() => {
+    const virtualItems = rowVirtualizer.getVirtualItems();
+    if (virtualItems.length === 0) return;
+
+    const lastItem = virtualItems[virtualItems.length - 1];
+    const nearBottom = lastItem.index >= filteredData.length - 10;
+    
+    if (nearBottom && !isLoading && hasMore) {
+      loadMoreData();
+    }
+  }, [rowVirtualizer.getVirtualItems(), filteredData.length, isLoading, hasMore, loadMoreData]);
 
   const addFilter = useCallback((columnId: string, columnType: ColumnType, operator: TextFilterOperator | NumberFilterOperator, value: string | number) => {
     const newFilter: Filter = {
@@ -233,11 +303,9 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
     setFilters(prev => prev.filter(f => f.id !== filterId));
   }, []);
 
-
   const clearAllFilters = useCallback(() => {
     setFilters([]);
   }, []);
-
 
   const getColumnFilters = useCallback((columnId: string) => {
     return filters.filter(filter => filter.columnId === columnId);
@@ -339,7 +407,6 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
     );
   };
 
-
   const columns = useMemo<ColumnDef<any>[]>(() => {
     return data.columns.map(column => {
       const columnFilters = getColumnFilters(column.id);
@@ -362,14 +429,13 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                 className={`filter-btn ${columnFilters.length > 0 ? 'active' : ''}`}
                 title="Filter column"
               >
-                
+                ⚙️
                 {columnFilters.length > 0 && (
                   <span className="filter-count">{columnFilters.length}</span>
                 )}
               </button>
             </div>
             
-            {}
             {columnFilters.length > 0 && (
               <div className="active-filters">
                 {columnFilters.map(filter => (
@@ -391,13 +457,24 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
           const isEditing = editingCell?.rowId === rowId && editingCell.columnId === column.id;
 
           const handleCellUpdate = (newValue: any) => {
+            // Update all rows reference
+            allRowsRef.current = allRowsRef.current.map(row =>
+              row.id === rowId 
+                ? { ...row, [column.id]: newValue }
+                : row
+            );
+            
+            // Update loaded rows
+            loadedRowsRef.current = loadedRowsRef.current.map(row =>
+              row.id === rowId 
+                ? { ...row, [column.id]: newValue }
+                : row
+            );
+            
+            // Update state
             setData(prev => ({
               ...prev,
-              rows: prev.rows.map(row => 
-                row.id === rowId 
-                  ? { ...row, [column.id]: newValue }
-                  : row
-              ),
+              rows: allRowsRef.current,
             }));
           };
 
@@ -427,6 +504,16 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                 }}
                 autoFocus
                 className="cell-input"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  padding: '8px 12px',
+                  margin: 0,
+                  font: 'inherit',
+                  boxSizing: 'border-box',
+                }}
                 onFocus={(e) => e.target.select()}
               />
             );
@@ -445,6 +532,8 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                 height: "100%",
                 display: "flex",
                 alignItems: "center",
+                width: '100%',
+                boxSizing: 'border-box',
               }}
             >
               {value}
@@ -465,27 +554,6 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
 
   const { rows } = table.getRowModel();
 
-  // Virtualizer for performance - FIXED with proper ref
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 40,
-    overscan: 10,
-  });
-
-  const virtualRows = rowVirtualizer.getVirtualItems();
-
-  if (virtualRows.length > 0) {
-  const lastItem = virtualRows[virtualRows.length - 1];
-  const nearBottom = lastItem.index >= data.length - 10;
-  if (nearBottom && !isLoading && hasMoreData) {
-    loadMoreData(); 
-  }
-}
-
-  const totalSize = rowVirtualizer.getTotalSize();
-
-
   const addNewColumn = () => {
     if (!newColumnName.trim()) return;
 
@@ -495,76 +563,93 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
       type: newColumnType,
     };
 
+    const updatedRows = allRowsRef.current.map(row => ({
+      ...row,
+      [newColumn.id]: newColumnType === "number" ? 0 : "",
+    }));
+
+    allRowsRef.current = updatedRows;
+    loadedRowsRef.current = updatedRows.slice(0, 100);
+
     setData(prev => ({
       ...prev,
       columns: [...prev.columns, newColumn],
-      rows: prev.rows.map(row => ({
-        ...row,
-        [newColumn.id]: newColumnType === "number" ? 0 : "",
-      })),
+      rows: updatedRows,
     }));
 
     setNewColumnName("");
     setNewColumnType("text");
   };
 
- 
   const addNewRow = () => {
     const newRow: TableRow = { id: `row-${Date.now()}` };
-    
     
     data.columns.forEach(column => {
       newRow[column.id] = column.type === "number" ? 0 : "";
     });
 
+    const updatedRows = [...allRowsRef.current, newRow];
+    allRowsRef.current = updatedRows;
+    loadedRowsRef.current = updatedRows.slice(0, 100);
+
     setData(prev => ({
       ...prev,
-      rows: [...prev.rows, newRow],
+      rows: updatedRows,
     }));
   };
 
-  
+  // FIXED: Add 100k rows with better memory management
   const add100kRows = async () => {
     setIsAddingBulkRows(true);
     
-    setTimeout(() => {
+    // Use requestAnimationFrame to avoid blocking
+    requestAnimationFrame(() => {
       const bulkRows = createBulkRows(data.columns, 100000);
+      const updatedRows = [...allRowsRef.current, ...bulkRows];
+      
+      // Update references
+      allRowsRef.current = updatedRows;
+      loadedRowsRef.current = updatedRows.slice(0, 100);
+      currentPageRef.current = 1;
+      setHasMore(true);
+      
+      // Update state with minimal data
       setData(prev => ({
         ...prev,
-        rows: [...prev.rows, ...bulkRows],
+        rows: updatedRows,
       }));
+      
       setIsAddingBulkRows(false);
-    }, 100);
+    });
   };
-
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!editingCell) return;
 
-      const currentRowIndex = data.rows.findIndex(row => row.id === editingCell.rowId);
+      const currentRowIndex = allRowsRef.current.findIndex(row => row.id === editingCell.rowId);
       const currentColIndex = data.columns.findIndex(col => col.id === editingCell.columnId);
 
       if (e.key === "ArrowUp" && currentRowIndex > 0) {
         e.preventDefault();
-        const prevRow = data.rows[currentRowIndex - 1];
+        const prevRow = allRowsRef.current[currentRowIndex - 1];
         setEditingCell({ rowId: prevRow.id, columnId: editingCell.columnId });
         setEditValue(String(prevRow[editingCell.columnId] || ""));
-      } else if (e.key === "ArrowDown" && currentRowIndex < data.rows.length - 1) {
+      } else if (e.key === "ArrowDown" && currentRowIndex < allRowsRef.current.length - 1) {
         e.preventDefault();
-        const nextRow = data.rows[currentRowIndex + 1];
+        const nextRow = allRowsRef.current[currentRowIndex + 1];
         setEditingCell({ rowId: nextRow.id, columnId: editingCell.columnId });
         setEditValue(String(nextRow[editingCell.columnId] || ""));
       } else if (e.key === "ArrowLeft" && currentColIndex > 0) {
         e.preventDefault();
         const prevCol = data.columns[currentColIndex - 1];
         setEditingCell({ rowId: editingCell.rowId, columnId: prevCol.id });
-        setEditValue(String(data.rows[currentRowIndex][prevCol.id] || ""));
+        setEditValue(String(allRowsRef.current[currentRowIndex][prevCol.id] || ""));
       } else if (e.key === "ArrowRight" && currentColIndex < data.columns.length - 1) {
         e.preventDefault();
         const nextCol = data.columns[currentColIndex + 1];
         setEditingCell({ rowId: editingCell.rowId, columnId: nextCol.id });
-        setEditValue(String(data.rows[currentRowIndex][nextCol.id] || ""));
+        setEditValue(String(allRowsRef.current[currentRowIndex][nextCol.id] || ""));
       }
     };
 
@@ -572,7 +657,6 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [editingCell, data]);
 
-  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (activeFilterColumn && !(event.target as Element).closest('.column-filter-section') && 
@@ -587,7 +671,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
 
   return (
     <div className="data-table-container">
-      {}
+      {/* Table Header */}
       <div className="table-header">
         <div className="table-title-section">
           <h2 className="table-title">{data.name}</h2>
@@ -655,7 +739,7 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
         </div>
       </div>
 
-      {}
+      {/* Filter Popover */}
       {activeFilterColumn && (() => {
         const column = data.columns.find(col => col.id === activeFilterColumn);
         if (!column) return null;
@@ -684,18 +768,35 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
         );
       })()}
 
-      {}
+      {/* Virtualized Table - FIXED HEIGHT AND MEMORY */}
       <div 
         ref={tableContainerRef}
         className="table-container"
         style={{
-          height: '400px',
+          height: '600px',
           overflow: 'auto',
           position: 'relative',
+          border: '1px solid #e2e8f0',
         }}
       >
-        <table className="data-table">
-          <thead className="table-head">
+        <table 
+          className="data-table" 
+          style={{ 
+            width: '100%', 
+            borderCollapse: 'collapse',
+            tableLayout: 'fixed',
+            position: 'relative',
+          }}
+        >
+          <thead 
+            className="table-head" 
+            style={{ 
+              position: 'sticky', 
+              top: 0, 
+              background: 'white', 
+              zIndex: 1,
+            }}
+          >
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -704,7 +805,15 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
                     className="table-header-cell"
                     style={{
                       width: header.getSize(),
-                      position: "relative",
+                      padding: '8px 12px',
+                      border: '1px solid #e2e8f0',
+                      background: '#f8fafc',
+                      fontWeight: '600',
+                      textAlign: 'left',
+                      verticalAlign: 'middle',
+                      position: 'relative',
+                      height: '40px',
+                      boxSizing: 'border-box',
                     }}
                     data-column-id={header.id}
                   >
@@ -717,62 +826,114 @@ export function DataTable({ initialData, onTableUpdate }: DataTableProps) {
               </tr>
             ))}
           </thead>
-          <tbody className="table-body">
-            {}
-            {virtualRows.length > 0 && (
-              <>
-                <tr>
-                  <td
-                    style={{
-                      height: virtualRows[0]?.start || 0,
-                    }}
-                  />
-                </tr>
-                {virtualRows.map((virtualRow) => {
-                  const row = rows[virtualRow.index];
-                  if (!row) return null;
+          <tbody 
+            style={{
+              height: `${totalSize}px`,
+              display: 'block',
+            }}
+          >
+            {/* Top spacer */}
+            <tr>
+              <td colSpan={data.columns.length} style={{ 
+                height: `${virtualRows[0]?.start || 0}px`,
+                display: 'block',
+                padding: 0,
+                margin: 0,
+              }} />
+            </tr>
 
-                  return (
-                    <tr
-                      key={row.id}
-                      data-index={virtualRow.index}
-                      ref={rowVirtualizer.measureElement}
-                      className="table-row"
+            {/* Virtualized rows */}
+            {virtualRows.map((virtualRow) => {
+              const row = rows[virtualRow.index];
+              if (!row) return null;
+
+              return (
+                <tr
+                  key={row.id}
+                  data-index={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
+                  className="table-row"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`,
+                    display: 'table',
+                    tableLayout: 'fixed',
+                    height: '40px', // Fixed height
+                  }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      className="table-cell"
+                      style={{
+                        width: cell.column.getSize(),
+                        padding: '8px 12px',
+                        border: '1px solid #e2e8f0',
+                        verticalAlign: 'middle',
+                        height: '40px', // Fixed height
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        boxSizing: 'border-box',
+                      }}
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          className="table-cell"
-                          style={{
-                            width: cell.column.getSize(),
-                            height: "40px",
-                          }}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })}
-                <tr>
-                  <td
-                    style={{
-                      height: totalSize - (virtualRows[virtualRows.length - 1]?.end || 0),
-                    }}
-                  />
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
                 </tr>
-              </>
-            )}
+              );
+            })}
+
+            {/* Bottom spacer */}
+            <tr>
+              <td colSpan={data.columns.length} style={{ 
+                height: `${totalSize - (virtualRows[virtualRows.length - 1]?.end || 0)}px`,
+                display: 'block',
+                padding: 0,
+                margin: 0,
+              }} />
+            </tr>
           </tbody>
         </table>
+        
+        {/* Loading indicator */}
+        {isLoading && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '10px',
+            position: 'sticky',
+            bottom: 0,
+            background: 'white',
+            borderTop: '1px solid #e2e8f0'
+          }}>
+            Loading more data...
+          </div>
+        )}
+        
+        {/* End of data message */}
+        {!hasMore && filteredData.length > 0 && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '10px',
+            position: 'sticky',
+            bottom: 0,
+            background: 'white',
+            borderTop: '1px solid #e2e8f0'
+          }}>
+            All data loaded
+          </div>
+        )}
       </div>
 
-      {}
+      {/* Table Info */}
       <div className="table-info">
-        <span>{filteredData.length} rows ({data.rows.length} total)</span>
+        <span>{filteredData.length} rows displayed ({allRowsRef.current.length} total)</span>
         <span>{data.columns.length} columns</span>
         {filters.length > 0 && <span>{filters.length} active filters</span>}
         {searchTerm && <span>Search: "{searchTerm}"</span>}
